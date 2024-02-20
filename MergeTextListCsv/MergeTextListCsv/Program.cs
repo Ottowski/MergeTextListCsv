@@ -51,22 +51,18 @@ public class Program
         var oldListFile1 = Path.Combine(projectFolderPath, "example-input-list-without-indexes.csv");
         var oldListFile2 = Path.Combine(projectFolderPath, "example-input-list-another-input.csv");
         var newListFile = Path.Combine(projectFolderPath, "trying-to-be-perfect-combined-List.csv");
-        //Read DAta from both files
+
+        // Read Data from both files
         List<DataItem> dataList1 = ReadDataFromCsv(oldListFile1);
         List<DataItem> dataList2 = ReadDataFromCsv(oldListFile2);
-        // Combine both lists
-        HashSet<string> uniqueAdsVariableName = new HashSet<string>();
-        List<DataItem> combinedList = new List<DataItem>();
 
-        foreach (var DataItem in dataList1.Concat(dataList2))
-        {
-            if (!uniqueAdsVariableName.Contains(DataItem.AdsVariableName))
-            {
-                combinedList.Add(DataItem);
-                uniqueAdsVariableName.Add(DataItem.AdsVariableName);
-            }
-            
-        }
+        // Combine both lists with unique variable name
+        var uniqueAdsVariableNames = dataList1.Concat(dataList2).Select(x => x.AdsVariableName).Distinct();
+        List<DataItem> combinedList = dataList1.Concat(dataList2)
+            .GroupBy(x => x.AdsVariableName)
+            .Select(group => group.First())
+            .ToList();
+
         // Write new combined list to a new file
         WriteDataToCsv(newListFile, combinedList);
     }
@@ -109,7 +105,6 @@ public class Program
             csv.WriteRecords(data);
         }
     }
-
 
     public class DataItem
     {
