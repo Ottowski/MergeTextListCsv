@@ -1,0 +1,6 @@
+ads variable name, modbus address, modbus permisson
+EM0X._EMB0X_HS1_TS2_LOW_LIMIT_SP,,rw
+EM0X._EMB0X_HS1_TS2_HIGH_LIMIT_SP,,rw
+EM0X._COOLING_FREE_MODE_V,,r
+EM0X._COOLING_MODE_ACTIVE_V,,r
+MODULE.CS10.P1A._M,,rw

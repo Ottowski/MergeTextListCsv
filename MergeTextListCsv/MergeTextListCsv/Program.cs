@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using CsvHelper;
+using CsvHelper.Configuration;
+using System.Linq;
+using System.Globalization;
 
-class Program
+public class Program
 {
-    static List<string> combinedLines = new List<string>(); // Declared at the class level
-
     static void Main(string[] args)
     {
         bool keepRunning = true;
@@ -14,13 +17,12 @@ class Program
             Console.Clear();
             Console.WriteLine("Welcome to the NewTextMerger");
             Console.WriteLine("\n1. Generate a new list");
-            Console.WriteLine("2. Generate a list with separated indexes");
             Console.WriteLine("0. Exit");
 
             Console.Write("Enter your choice: ");
-            string MenuOption = Console.ReadLine();
+            string menuOption = Console.ReadLine();
 
-            switch (MenuOption)
+            switch (menuOption)
             {
                 case "1":
                     Console.WriteLine("Creating a new list ...");
@@ -28,13 +30,6 @@ class Program
                     Console.WriteLine("List successfully created!");
                     Console.WriteLine("Press Enter to return to the main menu...");
                     Console.ReadLine();
-                    break;
-                case "2":
-                    Console.WriteLine("Creating a new index list ...");
-                    IndexList();
-                    Console.WriteLine("Index list 'indexList.csv' created successfully.");
-                    Console.WriteLine("Press Enter to return to the main menu...");
-                    Console.ReadLine(); // Wait for user to press Enter before returning to the main menu
                     break;
                 case "0":
                     keepRunning = false;
@@ -50,23 +45,71 @@ class Program
 
     private static void GenerateNewList()
     {
-        string projectFolderPath = AppDomain.CurrentDomain.BaseDirectory;
+        var projectFolderPath = ""; // Provide folder path destination where CSV files are
 
-        string oldListFile1 = Path.Combine(projectFolderPath, "example-input-list-without-indexes.csv");
-        string oldListFile2 = Path.Combine(projectFolderPath, "example-input-list-another-input.csv");
-        string newListFile = Path.Combine(projectFolderPath, "new-example-of-combined-List.csv");
+        // Find paths to input all CSV files
+        var oldListFile1 = Path.Combine(projectFolderPath, "example-input-list-without-indexes.csv");
+        var oldListFile2 = Path.Combine(projectFolderPath, "example-input-list-another-input.csv");
+        var newListFile = Path.Combine(projectFolderPath, "trying-to-be-perfect-combined-List.csv");
+        //Read DAta from both files
+        List<DataItem> dataList1 = ReadDataFromCsv(oldListFile1);
+        List<DataItem> dataList2 = ReadDataFromCsv(oldListFile2);
+        // Combine both lists
+        HashSet<string> uniqueAdsVariableName = new HashSet<string>();
+        List<DataItem> combinedList = new List<DataItem>();
 
-        string[] oldList1 = File.ReadAllLines(oldListFile1);
-        string[] oldList2 = File.ReadAllLines(oldListFile2);
-
-        string[] mergedList = new string[oldList1.Length + oldList2.Length];
-        Array.Copy(oldList1, 0, mergedList, 0, oldList1.Length);
-        Array.Copy(oldList2, 0, mergedList, oldList1.Length, oldList2.Length);
-
-        File.WriteAllLines(newListFile, mergedList);
-
-        Console.WriteLine($"New list file '{newListFile}' created successfully with {mergedList.Length} entries.");
+        foreach (var DataItem in dataList1.Concat(dataList2))
+        {
+            if (!uniqueAdsVariableName.Contains(DataItem.AdsVariableName))
+            {
+                combinedList.Add(DataItem);
+                uniqueAdsVariableName.Add(DataItem.AdsVariableName);
+            }
+            
+        }
+        // Write new combined list to a new file
+        WriteDataToCsv(newListFile, combinedList);
     }
+
+    private static List<DataItem> ReadDataFromCsv(string filePath)
+    {
+        using (var reader = new StreamReader(filePath))
+        using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+        {
+            // Read the header record
+            csv.Read();
+            csv.ReadHeader();
+
+            // Create a list to store the data
+            var dataList = new List<DataItem>();
+
+            // Loop through each record and map it to a DataItem object
+            while (csv.Read())
+            {
+                var dataItem = new DataItem
+                {
+                    AdsVariableName = csv.GetField("ads variable name"),
+                    ModbusAddress = csv.TryGetField("modbus address", out string modbusAddress) ? modbusAddress : null,
+                    ModbusPermission = csv.TryGetField("modbus permission", out string modbusPermission) ? modbusPermission : null,
+                    Type = csv.TryGetField("type", out string type) ? type : null
+                };
+
+                dataList.Add(dataItem);
+            }
+
+            return dataList;
+        }
+    }
+
+    private static void WriteDataToCsv(string filePath, List<DataItem> data)
+    {
+        using (var writer = new StreamWriter(filePath))
+        using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+        {
+            csv.WriteRecords(data);
+        }
+    }
+
 
     public class DataItem
     {
@@ -75,137 +118,4 @@ class Program
         public string ModbusPermission { get; set; }
         public string Type { get; set; }
     }
-
-    private static void IndexList()
-    {
-        string projectFolderPath = AppDomain.CurrentDomain.BaseDirectory;
-        var anotherInputFile = Path.Combine(projectFolderPath, "example-input-list-another-input.csv");
-        var withoutIndexesFile = Path.Combine(projectFolderPath, "example-input-list-without-indexes.csv");
-        var newfile = Path.Combine(projectFolderPath, "indexList.csv");
-
-        var anotherInputDictionary = new Dictionary<string, DataItem>();
-        var withoutIndexesDictionary = new Dictionary<string, DataItem>();
-
-        // Read data from the 'example-input-list-another-input.csv' file
-        ReadDataFromFile(anotherInputFile, anotherInputDictionary);
-
-        // Read data from the 'example-input-list-without-indexes.csv' file
-        ReadDataFromFile(withoutIndexesFile, withoutIndexesDictionary);
-
-        // Combine data based on common keys
-        var combinedLines = new List<string>();
-        combinedLines.Add("ads variable name,modbus address,modbus permission,type");
-
-        foreach (var key in anotherInputDictionary.Keys)
-        {
-            if (withoutIndexesDictionary.TryGetValue(key, out var item))
-            {
-                combinedLines.Add($"{item.AdsVariableName},{item.ModbusAddress},{item.ModbusPermission},{item.Type}");
-            }
-            else
-            {
-                item = anotherInputDictionary[key];
-                combinedLines.Add($"{item.AdsVariableName},{item.ModbusAddress},{item.ModbusPermission},{item.Type}");
-            }
-        }
-
-        // Write combined data to the output CSV file
-        File.WriteAllLines(newfile, combinedLines);
-    }
-
-    private static void ReadDataFromFile(string filePath, Dictionary<string, DataItem> dictionary)
-    {
-        string[] lines = File.ReadAllLines(filePath);
-
-        foreach (string line in lines)
-        {
-            string[] parts = line.Split('\t');
-            if (parts.Length >= 3)
-            {
-                var item = new DataItem
-                {
-                    AdsVariableName = parts[0],
-                    ModbusAddress = parts[1],
-                    ModbusPermission = parts[2],
-                    Type = parts.Length >= 4 ? parts[3] : ""
-                };
-                dictionary[item.AdsVariableName] = item;
-            }
-            else
-            {
-                Console.WriteLine($"Skipping line: {line}. Not enough elements.");
-            }
-        }
-    }
-
 }
-
-
-/*private static void IndexList()
-{
-    string[] anotherInputLines = File.ReadAllLines("example-input-list-another-input.csv");
-    Dictionary<string, DataItem> anotherInputDictionary = new Dictionary<string, DataItem>();
-    foreach (string line in anotherInputLines)
-    {
-        string[] parts = line.Split('\t');
-        if (parts.Length >= 3) 
-        {
-            var item = new DataItem
-            {
-                AdsVariableName = parts[0],
-                ModbusAddress = parts[1],
-                ModbusPermission = parts[2],
-                Type = "" 
-            };
-            anotherInputDictionary[item.AdsVariableName] = item;
-        }
-        else
-        {
-            Console.WriteLine($"Skipping line: {line}. Not enough elements.");
-        }
-    }
-
-
-    string[] withoutIndexesLines = File.ReadAllLines("example-input-list-without-indexes.csv");
-    Dictionary<string, DataItem> withoutIndexesDictionary = new Dictionary<string, DataItem>();
-    foreach (string line in withoutIndexesLines)
-    {
-        string[] parts = line.Split('\t');
-        if (parts.Length >= 3) // Ensure that there are at least three parts after splitting
-        {
-            var item = new DataItem
-            {
-                AdsVariableName = parts[0],
-                ModbusAddress = parts[1],
-                ModbusPermission = parts[2],
-                Type = parts.Length >= 4 ? parts[3] : ""
-            };
-            withoutIndexesDictionary[item.AdsVariableName] = item;
-        }
-        else
-        {
-            Console.WriteLine($"Skipping line: {line}. Not enough elements.");
-        }
-    }
-
-    combinedLines.Clear(); // Clear the list before adding new lines
-
-    // Combine data based on common keys
-    combinedLines.Add("ads variable name\tmodbus address\tmodbus permission\ttype");
-    foreach (var key in anotherInputDictionary.Keys)
-    {
-        if (withoutIndexesDictionary.TryGetValue(key, out var item))
-        {
-            combinedLines.Add($"{item.AdsVariableName}\\s+{item.ModbusAddress}\\s+{item.ModbusPermission}\\s+{item.Type}");
-        }
-        else
-        {
-            item = anotherInputDictionary[key];
-            combinedLines.Add($"{item.AdsVariableName}\\s+{item.ModbusAddress}\\s+{item.ModbusPermission}\\s+{item.Type}");
-        }
-    }
-
-    File.WriteAllLines("indexList.csv", combinedLines);
-}*/
-
-

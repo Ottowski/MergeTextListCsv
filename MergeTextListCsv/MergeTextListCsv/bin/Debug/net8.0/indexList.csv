@@ -1,0 +1,18 @@
+ads variable name, modbus address, modbus permisson,null
+EM0X._EMB0X_HS1_TS2_LOW_LIMIT_SP,,rw,null
+EM0X._EMB0X_HS1_TS2_HIGH_LIMIT_SP,,rw,null
+EM0X._COOLING_FREE_MODE_V,,r,null
+EM0X._COOLING_MODE_ACTIVE_V,,r,null
+MODULE.CS10.P2A._M,null,null,null
+MODULE.CS10.P3A._M,null,null,null
+MODULE.CS10.P4A._M,null,null,null
+MODULE.CS10.P5A._M,null,null,null
+MODULE.CS10.P6A._M,null,null,null
+MODULE.CS10.P7A._M,null,null,null
+MODULE.CS10.P8A._M,null,null,null
+ads variable name, modbus address, modbus permisson,null
+EM0X._EMB0X_HS1_TS2_LOW_LIMIT_SP,,rw,null
+EM0X._EMB0X_HS1_TS2_HIGH_LIMIT_SP,,rw,null
+EM0X._COOLING_FREE_MODE_V,,r,null
+EM0X._COOLING_MODE_ACTIVE_V,,r,null
+,,rw,null
