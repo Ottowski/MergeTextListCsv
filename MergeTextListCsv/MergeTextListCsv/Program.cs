@@ -104,6 +104,32 @@ class Program
             combinedRecords.Add(combinedRecord);
         }
 
+        // Add missing records from the first CSV file
+        foreach (var firstRecord in firstCsvRecords)
+        {
+            if (!combinedRecords.Any(x => x.AdsVariableName == firstRecord.AdsVariableName))
+            {
+                var combinedRecord = new CombinedCsvRecord
+                {
+                    AdsVariableName = firstRecord.AdsVariableName,
+                    ModbusAddress = firstRecord.ModbusAddress,
+                    ModbusPermission = firstRecord.ModbusPermission
+                };
+                combinedRecords.Add(combinedRecord);
+            }
+        }
+
+        // Merge records from the second CSV file
+        foreach (var secondRecord in secondCsvRecords)
+        {
+            var combinedRecord = new CombinedCsvRecord
+            {
+                AdsVariableName = secondRecord.AdsVariableName,
+                Type = secondRecord.Type
+            };
+            combinedRecords.Add(combinedRecord);
+        }
+
         // Add missing records from the second CSV file
         foreach (var secondRecord in secondCsvRecords)
         {

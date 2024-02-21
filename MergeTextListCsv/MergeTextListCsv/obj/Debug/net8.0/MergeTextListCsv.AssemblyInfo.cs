@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MergeTextListCsv")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7973c5b775f995de0716be6a135f8cf6b1a98df7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d54798e737b1ef11377306e237d038250e0b6f88")]
 [assembly: System.Reflection.AssemblyProductAttribute("MergeTextListCsv")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MergeTextListCsv")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
