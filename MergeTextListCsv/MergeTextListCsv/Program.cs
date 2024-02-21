@@ -92,7 +92,7 @@ class Program
         // Merge the data
         var combinedRecords = new List<CombinedCsvRecord>();
 
-        // Merge records from the first CSV file
+        // Merge records first CSV file
         foreach (var firstRecord in firstCsvRecords)
         {
             var combinedRecord = new CombinedCsvRecord
@@ -104,7 +104,7 @@ class Program
             combinedRecords.Add(combinedRecord);
         }
 
-        // Add missing records from the first CSV file
+        // Add missing records first CSV file
         foreach (var firstRecord in firstCsvRecords)
         {
             if (!combinedRecords.Any(x => x.AdsVariableName == firstRecord.AdsVariableName))
@@ -119,18 +119,23 @@ class Program
             }
         }
 
-        // Merge records from the second CSV file
+        // Merge records second CSV file
         foreach (var secondRecord in secondCsvRecords)
         {
-            var combinedRecord = new CombinedCsvRecord
+            // Check if the record already exists in the combined list
+            if (!combinedRecords.Any(x => x.AdsVariableName == secondRecord.AdsVariableName))
             {
-                AdsVariableName = secondRecord.AdsVariableName,
-                Type = secondRecord.Type
-            };
-            combinedRecords.Add(combinedRecord);
+                // If not, create a new CombinedCsvRecord with null values for ModbusAddress and ModbusPermission
+                var combinedRecord = new CombinedCsvRecord
+                {
+                    AdsVariableName = secondRecord.AdsVariableName,
+                    Type = secondRecord.Type
+                };
+                combinedRecords.Add(combinedRecord);
+            }
         }
 
-        // Add missing records from the second CSV file
+        // Add missing records second CSV file
         foreach (var secondRecord in secondCsvRecords)
         {
             if (!combinedRecords.Any(x => x.AdsVariableName == secondRecord.AdsVariableName))
@@ -144,7 +149,7 @@ class Program
             }
         }
 
-        // Write the combined data to a new CSV file
+        // Write the combined new CSV file
         using (var writer = new StreamWriter(combinedCsvFilePath))
         using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
         {
