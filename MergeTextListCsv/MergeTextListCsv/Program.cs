@@ -44,8 +44,8 @@ class Program
 
         while (true)
         {
-            Console.WriteLine("\nMenu:");
-            Console.WriteLine("1. Merge CSV files");
+            Console.WriteLine("\nMenuOptions:");
+            Console.WriteLine("\n1. Merge CSV files");
             Console.WriteLine("2. Exit");
 
             Console.Write("Select an option: ");
@@ -54,13 +54,15 @@ class Program
             switch (choice)
             {
                 case "1":
+                    Console.WriteLine("\nCreating a new list from merging...");
                     MergeCsvFiles();
+                    Console.WriteLine("List was successfully created!");
                     break;
                 case "2":
-                    Console.WriteLine("Exiting...");
+                    Console.WriteLine("\nExiting...");
                     return;
                 default:
-                    Console.WriteLine("Invalid option. Please try again.");
+                    Console.WriteLine("\nInvalid option. Please try again.");
                     break;
             }
         }
@@ -92,16 +94,30 @@ class Program
         // Merge the data
         var combinedRecords = new List<CombinedCsvRecord>();
 
-        // Merge records first CSV file
+        
+        // Merge records from the first CSV file
         foreach (var firstRecord in firstCsvRecords)
         {
-            var combinedRecord = new CombinedCsvRecord
+            // Check if the record already exists in the combined list
+            var existingRecord = combinedRecords.FirstOrDefault(x => x.AdsVariableName == firstRecord.AdsVariableName);
+
+            if (existingRecord == null)
             {
-                AdsVariableName = firstRecord.AdsVariableName,
-                ModbusAddress = firstRecord.ModbusAddress,
-                ModbusPermission = firstRecord.ModbusPermission
-            };
-            combinedRecords.Add(combinedRecord);
+                // If not, create a new CombinedCsvRecord
+                var combinedRecord = new CombinedCsvRecord
+                {
+                    AdsVariableName = firstRecord.AdsVariableName,
+                    ModbusAddress = firstRecord.ModbusAddress,
+                    ModbusPermission = firstRecord.ModbusPermission
+                };
+                combinedRecords.Add(combinedRecord);
+            }
+            else
+            {
+                // If exists, update the existing record with ModbusAddress and ModbusPermission
+                existingRecord.ModbusAddress = firstRecord.ModbusAddress;
+                existingRecord.ModbusPermission = firstRecord.ModbusPermission;
+            }
         }
 
         // Add missing records first CSV file
@@ -119,19 +135,26 @@ class Program
             }
         }
 
-        // Merge records second CSV file
+        // Merge records from the second CSV file
         foreach (var secondRecord in secondCsvRecords)
         {
             // Check if the record already exists in the combined list
-            if (!combinedRecords.Any(x => x.AdsVariableName == secondRecord.AdsVariableName))
+            var existingRecord = combinedRecords.FirstOrDefault(x => x.AdsVariableName == secondRecord.AdsVariableName);
+
+            if (existingRecord == null)
             {
-                // If not, create a new CombinedCsvRecord with null values for ModbusAddress and ModbusPermission
+                // If not, create a new CombinedCsvRecord
                 var combinedRecord = new CombinedCsvRecord
                 {
                     AdsVariableName = secondRecord.AdsVariableName,
                     Type = secondRecord.Type
                 };
                 combinedRecords.Add(combinedRecord);
+            }
+            else
+            {
+                // If exists, update the existing record with Type
+                existingRecord.Type = secondRecord.Type;
             }
         }
 
@@ -156,6 +179,6 @@ class Program
             csv.WriteRecords(combinedRecords);
         }
 
-        Console.WriteLine("Combined CSV file created successfully.");
+        Console.WriteLine("\nCombined CSV file created successfully.");
     }
 }
