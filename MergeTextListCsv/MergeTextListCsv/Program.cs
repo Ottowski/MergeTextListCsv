@@ -6,16 +6,16 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 
-// Define classes to represent the structure of your CSV files
+
 public class FirstCsvRecord
 {
     [Name("AdsVariableName")]
     public string AdsVariableName { get; set; }
 
-    [Name(" ModbusAddress")] // Notice the space before ModbusAddress
-    public int ModbusAddress { get; set; }
+    [Name(" ModbusAddress")] 
+    public int? ModbusAddress { get; set; }
 
-    [Name(" ModbusPermission")] // Notice the space before ModbusPermission
+    [Name(" ModbusPermission")] 
     public string ModbusPermission { get; set; }
 }
 
@@ -24,9 +24,13 @@ public class SecondCsvRecord
     [Name("AdsVariableName")]
     public string AdsVariableName { get; set; }
 
-    [Name(" Type")] // Notice the space before Type
+    [Name(" Type")]  
     public string Type { get; set; }
+
+    [Name("Description")]  
+    public string Description { get; set; }
 }
+
 
 public class CombinedCsvRecord
 {
@@ -34,6 +38,7 @@ public class CombinedCsvRecord
     public int? ModbusAddress { get; set; }
     public string ModbusPermission { get; set; }
     public string Type { get; set; }
+    public string Description { get; set; }
 }
 
 class Program
@@ -70,8 +75,8 @@ class Program
     static void MergeCsvFiles()
     {
         string baseDirectory = @"C:\Users\ottoa\OneDrive\Skrivbord\MergeTextListCsv\MergeTextListCsv\MergeTextListCsv\bin\Debug\net8.0";
-        string firstCsvFilePath = Path.Combine(baseDirectory, "example-input-list-without-indexes.csv");
-        string secondCsvFilePath = Path.Combine(baseDirectory, "example-input-list-another-input.csv");
+        string firstCsvFilePath = Path.Combine(baseDirectory, "example-input-list-without-indexes2.csv");
+        string secondCsvFilePath = Path.Combine(baseDirectory, "example-input-list-another-input2.csv");
         string combinedCsvFilePath = Path.Combine(baseDirectory, "trying-to-be-perfect-combined-List.csv");
 
         // Read both CSV files
@@ -94,15 +99,15 @@ class Program
         var combinedRecords = new List<CombinedCsvRecord>();
 
         
-        // Merge records from the first CSV file
+        // Merge records from CSV file
         foreach (var firstRecord in firstCsvRecords)
         {
-            // Check if the record already exists in the combined list
+            // Check if the record already exists 
             var existingRecord = combinedRecords.FirstOrDefault(x => x.AdsVariableName == firstRecord.AdsVariableName);
 
             if (existingRecord == null)
             {
-                // If not, create a new CombinedCsvRecord
+                // If not, create new
                 var combinedRecord = new CombinedCsvRecord
                 {
                     AdsVariableName = firstRecord.AdsVariableName,
@@ -113,13 +118,13 @@ class Program
             }
             else
             {
-                // If exists, update the existing record with ModbusAddress and ModbusPermission
+                // If exists, update the existing record
                 existingRecord.ModbusAddress = firstRecord.ModbusAddress;
                 existingRecord.ModbusPermission = firstRecord.ModbusPermission;
             }
         }
 
-        // Add missing records first CSV file
+        // Add missing records 
         foreach (var firstRecord in firstCsvRecords)
         {
             if (!combinedRecords.Any(x => x.AdsVariableName == firstRecord.AdsVariableName))
@@ -134,30 +139,32 @@ class Program
             }
         }
 
-        // Merge records from the second CSV file
+        // Merge records from second CSV file
         foreach (var secondRecord in secondCsvRecords)
         {
-            // Check if the record already exists in the combined list
+            // Check if the record already exists 
             var existingRecord = combinedRecords.FirstOrDefault(x => x.AdsVariableName == secondRecord.AdsVariableName);
 
             if (existingRecord == null)
             {
-                // If not, create a new CombinedCsvRecord
+                // If not, create new
                 var combinedRecord = new CombinedCsvRecord
                 {
                     AdsVariableName = secondRecord.AdsVariableName,
-                    Type = secondRecord.Type
+                    Type = secondRecord.Type,
+                    Description = secondRecord.Description
                 };
                 combinedRecords.Add(combinedRecord);
             }
             else
             {
-                // If exists, update the existing record with Type
+                // If exists, update the existing record
                 existingRecord.Type = secondRecord.Type;
+                existingRecord.Description = secondRecord.Description;
             }
         }
 
-        // Add missing records second CSV file
+        // Add missing records second
         foreach (var secondRecord in secondCsvRecords)
         {
             if (!combinedRecords.Any(x => x.AdsVariableName == secondRecord.AdsVariableName))
@@ -165,7 +172,8 @@ class Program
                 var combinedRecord = new CombinedCsvRecord
                 {
                     AdsVariableName = secondRecord.AdsVariableName,
-                    Type = secondRecord.Type
+                    Type = secondRecord.Type,
+                    Description = secondRecord.Description
                 };
                 combinedRecords.Add(combinedRecord);
             }
