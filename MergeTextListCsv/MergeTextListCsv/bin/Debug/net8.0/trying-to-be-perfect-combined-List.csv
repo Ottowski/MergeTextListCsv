@@ -7,7 +7,7 @@ MODULE.CS10.P1A._M,6,rw,,
 MODULE.CS10.P7A._M,10,,,OP signal
 MODULE.CS10.P8A._M,,rw," bool",Min scale setpoint
 MODULE.CS10.P2A._M,,," bool",Max scale setpoint
-MODULE.CS10.P3A._M,,," bool",OP signal
-MODULE.CS10.P4A._M,,," bool",OP signal
-MODULE.CS10.P5A._M,,," bool",
+MODULE.CS10.P3A._M,,r," bool",OP signal
+MODULE.CS10.P4A._M,,rw," bool",OP signal
+MODULE.CS10.P5A._M,,rw," bool",
 MODULE.CS10.P6A._M,,," bool",Max scale setpoint

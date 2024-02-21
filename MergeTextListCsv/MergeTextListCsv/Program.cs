@@ -12,10 +12,10 @@ public class FirstCsvRecord
     [Name("AdsVariableName")]
     public string AdsVariableName { get; set; }
 
-    [Name(" ModbusAddress")] 
+    [Name(" ModbusAddress")]
     public int? ModbusAddress { get; set; }
 
-    [Name(" ModbusPermission")] 
+    [Name(" ModbusPermission")]
     public string ModbusPermission { get; set; }
 }
 
@@ -24,10 +24,13 @@ public class SecondCsvRecord
     [Name("AdsVariableName")]
     public string AdsVariableName { get; set; }
 
-    [Name(" Type")]  
+    [Name(" Type")]
     public string Type { get; set; }
 
-    [Name("Description")]  
+    [Name(" ModbusPermission")]
+    public string ModbusPermission { get; set; }
+
+    [Name("Description")]
     public string Description { get; set; }
 }
 
@@ -76,7 +79,7 @@ class Program
     {
         string baseDirectory = @"C:\Users\ottoa\OneDrive\Skrivbord\MergeTextListCsv\MergeTextListCsv\MergeTextListCsv\bin\Debug\net8.0";
         string firstCsvFilePath = Path.Combine(baseDirectory, "example-input-list-without-indexes2.csv");
-        string secondCsvFilePath = Path.Combine(baseDirectory, "example-input-list-another-input2.csv");
+        string secondCsvFilePath = Path.Combine(baseDirectory, "example-input-list-another-input3.csv");
         string combinedCsvFilePath = Path.Combine(baseDirectory, "trying-to-be-perfect-combined-List.csv");
 
         // Read both CSV files
@@ -98,7 +101,7 @@ class Program
         // Merge the data
         var combinedRecords = new List<CombinedCsvRecord>();
 
-        
+
         // Merge records from CSV file
         foreach (var firstRecord in firstCsvRecords)
         {
@@ -152,7 +155,8 @@ class Program
                 {
                     AdsVariableName = secondRecord.AdsVariableName,
                     Type = secondRecord.Type,
-                    Description = secondRecord.Description
+                    Description = secondRecord.Description,
+                    ModbusPermission = secondRecord.ModbusPermission
                 };
                 combinedRecords.Add(combinedRecord);
             }
@@ -161,6 +165,7 @@ class Program
                 // If exists, update the existing record
                 existingRecord.Type = secondRecord.Type;
                 existingRecord.Description = secondRecord.Description;
+                existingRecord.ModbusPermission = secondRecord.ModbusPermission;
             }
         }
 
@@ -173,7 +178,8 @@ class Program
                 {
                     AdsVariableName = secondRecord.AdsVariableName,
                     Type = secondRecord.Type,
-                    Description = secondRecord.Description
+                    Description = secondRecord.Description,
+                    ModbusPermission = secondRecord.ModbusPermission
                 };
                 combinedRecords.Add(combinedRecord);
             }
