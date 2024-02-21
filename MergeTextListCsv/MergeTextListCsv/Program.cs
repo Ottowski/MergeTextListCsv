@@ -44,22 +44,21 @@ class Program
 
         while (true)
         {
-            Console.WriteLine("\nMenuOptions:");
+            Console.WriteLine("\nMainmenu Options:");
+            Console.Write("\nSelect an option: ");
             Console.WriteLine("\n1. Merge CSV files");
             Console.WriteLine("2. Exit");
-
-            Console.Write("Select an option: ");
             string choice = Console.ReadLine();
 
             switch (choice)
             {
                 case "1":
-                    Console.WriteLine("\nCreating a new list from merging...");
+                    Console.WriteLine("\nCreating a new CSV list from merging...");
                     MergeCsvFiles();
-                    Console.WriteLine("List was successfully created!");
+                    Console.WriteLine("\nReturning to the mainmenu!");
                     break;
                 case "2":
-                    Console.WriteLine("\nExiting...");
+                    Console.WriteLine("\nExiting CSV File Merger...");
                     return;
                 default:
                     Console.WriteLine("\nInvalid option. Please try again.");
@@ -179,6 +178,6 @@ class Program
             csv.WriteRecords(combinedRecords);
         }
 
-        Console.WriteLine("\nCombined CSV file created successfully.");
+        Console.WriteLine("\nCombined merging of CSV files was created successfully.");
     }
 }
