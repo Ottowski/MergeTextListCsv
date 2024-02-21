@@ -19,7 +19,6 @@ public class FirstCsvRecord
     public string ModbusPermission { get; set; }
 }
 
-
 public class SecondCsvRecord
 {
     [Name("AdsVariableName")]
@@ -28,7 +27,6 @@ public class SecondCsvRecord
     [Name(" Type")] // Notice the space before Type
     public string Type { get; set; }
 }
-
 
 public class CombinedCsvRecord
 {
@@ -92,19 +90,33 @@ class Program
         }
 
         // Merge the data
-        var combinedRecords = (
-            from first in firstCsvRecords
-            join second in secondCsvRecords
-            on first.AdsVariableName equals second.AdsVariableName into gj
-            from subSecond in gj.DefaultIfEmpty()
-            select new CombinedCsvRecord
+        var combinedRecords = new List<CombinedCsvRecord>();
+
+        // Merge records from the first CSV file
+        foreach (var firstRecord in firstCsvRecords)
+        {
+            var combinedRecord = new CombinedCsvRecord
             {
-                AdsVariableName = first.AdsVariableName,
-                ModbusAddress = first.ModbusAddress,
-                ModbusPermission = first.ModbusPermission,
-                Type = subSecond?.Type
+                AdsVariableName = firstRecord.AdsVariableName,
+                ModbusAddress = firstRecord.ModbusAddress,
+                ModbusPermission = firstRecord.ModbusPermission
+            };
+            combinedRecords.Add(combinedRecord);
+        }
+
+        // Add missing records from the second CSV file
+        foreach (var secondRecord in secondCsvRecords)
+        {
+            if (!combinedRecords.Any(x => x.AdsVariableName == secondRecord.AdsVariableName))
+            {
+                var combinedRecord = new CombinedCsvRecord
+                {
+                    AdsVariableName = secondRecord.AdsVariableName,
+                    Type = secondRecord.Type
+                };
+                combinedRecords.Add(combinedRecord);
             }
-        ).ToList();
+        }
 
         // Write the combined data to a new CSV file
         using (var writer = new StreamWriter(combinedCsvFilePath))
