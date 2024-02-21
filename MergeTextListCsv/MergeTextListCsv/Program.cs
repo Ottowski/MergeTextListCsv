@@ -1,116 +1,118 @@
-﻿using System;
+﻿using CsvHelper;
+using CsvHelper.Configuration.Attributes;
+using System;
 using System.Collections.Generic;
-using System.IO;
-using CsvHelper;
-using CsvHelper.Configuration;
-using System.Linq;
 using System.Globalization;
+using System.IO;
+using System.Linq;
 
-public class Program
+// Define classes to represent the structure of your CSV files
+public class FirstCsvRecord
+{
+    [Name("AdsVariableName")]
+    public string AdsVariableName { get; set; }
+
+    [Name(" ModbusAddress")] // Notice the space before ModbusAddress
+    public int ModbusAddress { get; set; }
+
+    [Name(" ModbusPermission")] // Notice the space before ModbusPermission
+    public string ModbusPermission { get; set; }
+}
+
+
+public class SecondCsvRecord
+{
+    [Name("AdsVariableName")]
+    public string AdsVariableName { get; set; }
+
+    [Name(" Type")] // Notice the space before Type
+    public string Type { get; set; }
+}
+
+
+public class CombinedCsvRecord
+{
+    public string AdsVariableName { get; set; }
+    public int? ModbusAddress { get; set; }
+    public string ModbusPermission { get; set; }
+    public string Type { get; set; }
+}
+
+class Program
 {
     static void Main(string[] args)
     {
-        bool keepRunning = true;
+        Console.WriteLine("Welcome to CSV File Merger!");
 
-        while (keepRunning)
+        while (true)
         {
-            Console.Clear();
-            Console.WriteLine("Welcome to the NewTextMerger");
-            Console.WriteLine("\n1. Generate a new list");
-            Console.WriteLine("0. Exit");
+            Console.WriteLine("\nMenu:");
+            Console.WriteLine("1. Merge CSV files");
+            Console.WriteLine("2. Exit");
 
-            Console.Write("Enter your choice: ");
-            string menuOption = Console.ReadLine();
+            Console.Write("Select an option: ");
+            string choice = Console.ReadLine();
 
-            switch (menuOption)
+            switch (choice)
             {
                 case "1":
-                    Console.WriteLine("Creating a new list ...");
-                    GenerateNewList();
-                    Console.WriteLine("List successfully created!");
-                    Console.WriteLine("Press Enter to return to the main menu...");
-                    Console.ReadLine();
+                    MergeCsvFiles();
                     break;
-                case "0":
-                    keepRunning = false;
-                    break;
+                case "2":
+                    Console.WriteLine("Exiting...");
+                    return;
                 default:
                     Console.WriteLine("Invalid option. Please try again.");
-                    Console.WriteLine("Press any of the number options to continue ...");
-                    Console.ReadKey();
                     break;
             }
         }
     }
 
-    private static void GenerateNewList()
+    static void MergeCsvFiles()
     {
-        var projectFolderPath = ""; // Provide folder path destination where CSV files are
+        string baseDirectory = @"C:\Users\ottoa\OneDrive\Skrivbord\MergeTextListCsv\MergeTextListCsv\MergeTextListCsv\bin\Debug\net8.0";
+        string firstCsvFilePath = Path.Combine(baseDirectory, "example-input-list-without-indexes.csv");
+        string secondCsvFilePath = Path.Combine(baseDirectory, "example-input-list-another-input.csv");
+        string combinedCsvFilePath = Path.Combine(baseDirectory, "trying-to-be-perfect-combined-List.csv");
 
-        // Find paths to input all CSV files
-        var oldListFile1 = Path.Combine(projectFolderPath, "example-input-list-without-indexes.csv");
-        var oldListFile2 = Path.Combine(projectFolderPath, "example-input-list-another-input.csv");
-        var newListFile = Path.Combine(projectFolderPath, "trying-to-be-perfect-combined-List.csv");
+        // Read both CSV files
+        List<FirstCsvRecord> firstCsvRecords;
+        List<SecondCsvRecord> secondCsvRecords;
 
-        // Read Data from both files
-        List<DataItem> dataList1 = ReadDataFromCsv(oldListFile1);
-        List<DataItem> dataList2 = ReadDataFromCsv(oldListFile2);
-
-        // Combine both lists with unique variable name
-        var uniqueAdsVariableNames = dataList1.Concat(dataList2).Select(x => x.AdsVariableName).Distinct();
-        List<DataItem> combinedList = dataList1.Concat(dataList2)
-            .GroupBy(x => x.AdsVariableName)
-            .Select(group => group.First())
-            .ToList();
-
-        // Write new combined list to a new file
-        WriteDataToCsv(newListFile, combinedList);
-    }
-
-    private static List<DataItem> ReadDataFromCsv(string filePath)
-    {
-        using (var reader = new StreamReader(filePath))
+        using (var reader = new StreamReader(firstCsvFilePath))
         using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
         {
-            // Read the header record
-            csv.Read();
-            csv.ReadHeader();
-
-            // Create a list to store the data
-            var dataList = new List<DataItem>();
-
-            // Loop through each record and map it to a DataItem object
-            while (csv.Read())
-            {
-                var dataItem = new DataItem
-                {
-                    AdsVariableName = csv.GetField("ads variable name"),
-                    ModbusAddress = csv.TryGetField("modbus address", out string modbusAddress) ? modbusAddress : null,
-                    ModbusPermission = csv.TryGetField("modbus permission", out string modbusPermission) ? modbusPermission : null,
-                    Type = csv.TryGetField("type", out string type) ? type : null
-                };
-
-                dataList.Add(dataItem);
-            }
-
-            return dataList;
+            firstCsvRecords = csv.GetRecords<FirstCsvRecord>().ToList();
         }
-    }
 
-    private static void WriteDataToCsv(string filePath, List<DataItem> data)
-    {
-        using (var writer = new StreamWriter(filePath))
+        using (var reader = new StreamReader(secondCsvFilePath))
+        using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+        {
+            secondCsvRecords = csv.GetRecords<SecondCsvRecord>().ToList();
+        }
+
+        // Merge the data
+        var combinedRecords = (
+            from first in firstCsvRecords
+            join second in secondCsvRecords
+            on first.AdsVariableName equals second.AdsVariableName into gj
+            from subSecond in gj.DefaultIfEmpty()
+            select new CombinedCsvRecord
+            {
+                AdsVariableName = first.AdsVariableName,
+                ModbusAddress = first.ModbusAddress,
+                ModbusPermission = first.ModbusPermission,
+                Type = subSecond?.Type
+            }
+        ).ToList();
+
+        // Write the combined data to a new CSV file
+        using (var writer = new StreamWriter(combinedCsvFilePath))
         using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
         {
-            csv.WriteRecords(data);
+            csv.WriteRecords(combinedRecords);
         }
-    }
 
-    public class DataItem
-    {
-        public string AdsVariableName { get; set; }
-        public string ModbusAddress { get; set; }
-        public string ModbusPermission { get; set; }
-        public string Type { get; set; }
+        Console.WriteLine("Combined CSV file created successfully.");
     }
 }

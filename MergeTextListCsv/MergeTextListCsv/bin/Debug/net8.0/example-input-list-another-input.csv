@@ -1,4 +1,4 @@
-ads variable name, type
+AdsVariableName, Type
 EM0X._EMB0X_HS1_TS2_LOW_LIMIT_SP,float
 EM0X._EMB0X_HS1_TS2_HIGH_LIMIT_SP,float
 EM0X._COOLING_FREE_MODE_V,bool

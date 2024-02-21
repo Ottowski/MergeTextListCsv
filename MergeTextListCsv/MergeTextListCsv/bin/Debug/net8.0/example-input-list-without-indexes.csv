@@ -1,4 +1,4 @@
-ads variable name, modbus address, modbus permisson
+AdsVariableName, ModbusAddress, ModbusPermission
 EM0X._EMB0X_HS1_TS2_LOW_LIMIT_SP,1,rw
 EM0X._EMB0X_HS1_TS2_HIGH_LIMIT_SP,3,rw
 EM0X._COOLING_FREE_MODE_V,4,r
